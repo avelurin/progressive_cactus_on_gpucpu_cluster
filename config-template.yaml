@@ -1,0 +1,135 @@
+#############################################################################
+# This config file is a necessary input file for the main Cactus Snakemake
+# pipeline: cactus.smk. It contains the parameters needed to run the pipeline.
+# See: https://github.com/ComparativeGenomicsToolkit/cactus/blob/master/doc/progressive.md#running-step-by-step
+#############################################################################
+
+# time -p snakemake -j 5 -e slurm -s cactus.smk --configfile config-template.yaml --dryrun
+
+#############################################################################
+#
+# Below are the parameters you need to set for the cactus snakemake pipeline.
+#
+
+cactus_path: /path/to/cactus_gpu.sif
+# File path or version string (e.g. 2.9.5) or "download".
+# Provide the path to the cactus singularity container. This is needed whether use_gpu is True or False.
+# If you don't have it, set this to "download" and the pipeline will download it for you.
+# If you want to download a specific version, provide the version tag, e.g. v2.9.7
+
+cactus_gpu_path: /path/to/cactus_gpu.sif
+# File path or version string (e.g. 2.9.5) or "download".
+# If using GPUs (i.e. if use_gpu: True), provide the path to the cactus GPU singularity container. 
+# If use_gpu is False, this will be ignored.
+# If you don't have it, set this to "download" and the pipeline will download it for you.
+# If you want to download a specific version, provide the version tag, e.g. v2.9.7
+
+conda_env: /path/to/conda/envs/cactus
+# Path to the conda environment used by the pipeline.
+# This environment must contain Snakemake and all Python dependencies (e.g. cactuslib, treelib).
+# You can either specify the full path to the env directory (as above),
+# or just the environment name if it's registered in your conda setup (e.g. "cactus").
+# The pipeline will automatically run `conda activate <conda_env>` before executing each shell command.
+
+input_file: /path/to/seqfile
+# File path.
+# File containing rooted Newick tree on the first line, and a list of tip labels and corresponding genome files on the following lines.
+
+output_dir: /path/to/output_dir
+# Directory path.
+# The desired output directory for the snakemake pipeline. This directory will be created if it doesn't exist.
+# This directory will be created if it doesn't exist.
+
+final_prefix: example_prefix
+# String.
+# The prefix for the final output files. This will be used to name the final HAL file and the final MAF files.
+# For example, "example_prefix.hal" and "example_prefix.maf".
+
+maf_reference: example_reference
+# String.
+# The reference genome for the MAF files. This should be the name of the reference genome in the input_file.
+# For example, if the input_file contains a tree with chiken 'Gallus_gallus', set this to 'Gallus_gallus'. 
+
+tmp_dir: /path/to/tmp_dir
+# Directory path.
+# A temporary directory for snakemake and cactus to use. Should have lots of space.
+
+use_gpu: True or False
+# True/False.
+# Whether or not to use the GPU version of cactus.
+# If you have GPU partitions and want to use them, set this to True.
+# If you don't have a GPU partition, set this to False.
+
+#############################################################################
+## These partitions and resource settings are configured for the “gwdu” cluster
+## at the Max Planck Institute. Adjust partition names, memory (mem_mb), CPU counts (cpus),
+## GPU counts (gpus), and time limits to match your own cluster’s queues and available resources
+## Be sure to adjust them to meet your needs and the resources available on your cluster.
+
+## Below are the partitions and resources for each rule in the snakemake pipeline.
+## Notably, for rule blast, if you use the GPU version of cactus you will need to
+## provide a partition with GPUs and set gpus to the number of GPUs you want to use.
+## If you are not using the cactus GPU version, the gpus value will be ignored.
+##
+## The partitions are specific to the Max Planck Institute cluster. If you run this on 
+## a different cluster you must change them.
+##
+## mem_mb is in MB
+## time is in minutes
+
+rule_resources:
+  default: 
+    partition: "scc-gpu"
+    mem_mb: 300000
+    gpus: 4
+    cpus: 48
+    time: 300
+
+  preprocess:
+    partition: "scc-cpu"
+    mem_mb: 500000
+    cpus: 48
+    gpus: 0
+    time: 120
+
+  blast:
+    partition: "scc-gpu" # If use_gpu is True, this must be a partition with GPUs
+    mem_mb: 350000
+    cpus: 48
+    gpus: 4 # If use_gpu is False, this will be ignored
+    time: 1500
+
+  align:
+    partition: "scc-cpu"
+    mem_mb: 500000
+    cpus: 96
+    gpus: 0
+    time: 2000
+
+  convert:
+    partition: "scc-cpu"
+    mem_mb: 100000
+    cpus: 48
+    gpus: 0    
+    time: 200
+
+  copy_hal:
+    partition: "scc-cpu"
+    mem_mb: 100000
+    cpus: 48
+    gpus: 0 
+    time: 200
+
+  append:
+    partition: "scc-cpu"
+    mem_mb: 100000
+    cpus: 48
+    gpus: 0
+    time: 500
+
+  maf:
+    partition: "scc-cpu"
+    mem_mb: 300000
+    cpus: 48
+    gpus: 0
+    time: 1500

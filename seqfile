@@ -1,0 +1,7 @@
+((Species1:0.100,(Species2:0.200,Species3:0.300):0.400):0.500,(Species4:0.600,(Species5:0.700,Species6:0.800):0.900):1.000);
+Species1    path/to/Species1.fna
+Species2    path/to/Species2.fna
+Species3    path/to/Species3.fna
+Species4    path/to/Species4.fna
+Species5    path/to/Species5.fna
+Species6    path/to/Species6.fna
